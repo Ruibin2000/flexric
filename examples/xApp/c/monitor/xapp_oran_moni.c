@@ -29,6 +29,7 @@
 #include "../../../../src/sm/rc_sm/ie/rc_data_ie.h"
 
 #include <stdlib.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
@@ -97,9 +98,10 @@ void sm_cb_kpm(sm_ag_if_rd_t const* rd, global_e2_node_id_t const* e2_node)
            now/1000000 - hdr_frm_1->collectStartTime,
            e2_node->type, e2_node->nb_id.nb_id);
 #elif defined(KPM_V3_00)
-    // collectStartTime (64bit) unit is micro-second
-    printf("KPM-v3 ind_msg latency = %ld μs from E2-node type %d ID %d\n",
-           now - hdr_frm_1->collectStartTime,
+    // The v3 ASN decoder normalizes NTP to Unix microseconds.
+    // This includes processing, queues and clock offset, not only transport.
+    printf("KPM-v3 report_age_us = %" PRId64 " from E2-node type %d ID %d\n",
+           now - (int64_t)hdr_frm_1->collectStartTime,
            e2_node->type, e2_node->nb_id.nb_id);
 #else
     static_assert(0!=0, "Unknown KPM version");

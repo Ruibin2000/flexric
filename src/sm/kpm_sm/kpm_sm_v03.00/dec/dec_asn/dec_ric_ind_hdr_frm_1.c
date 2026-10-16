@@ -1,39 +1,21 @@
 #include <assert.h>
 #include "../../../../../util/conversions.h"
-#include <arpa/inet.h> // ntohl
+#include <time.h>
 
 #include "dec_ric_ind_hdr_frm_1.h"
-
-// #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
-
-// uint64_t ntohll(uint64_t x)
-// {
-//   return (uint64_t)((uint64_t)ntohl((x) & 0xFFFFFFFFLL) << 32) | (uint32_t)ntohl(x);
-// }
-
-// #define ntohll(x) ((((uint64_t)ntohl(x)) << 32) + ntohl((x) >> 32))
-
-// #define NTOHLL(x) ((1==ntohl(1)) ? (x) : (((uint64_t)ntohl((x) & 0xFFFFFFFFUL)) << 32) | ntohl((uint32_t)((x) >> 32)))
-
-uint64_t ntohll(uint64_t x)
-{
-  uint32_t x1 = (uint32_t)((x & 0xFFFFFFFF00000000LL) >> 32);
-  uint32_t x2 = (uint32_t)(x & 0xFFFFFFFFLL);
-  x1 = ntohl(x1);
-  x2 = ntohl(x2);
-  uint64_t v = ((uint64_t)x1) << 32 | x2;
-
-  return v;
-}
-
+#include "../../ie/kpm_data_ie/kpm_ric_info/kpm_timestamp.h"
 
 kpm_ric_ind_hdr_format_1_t kpm_dec_ind_hdr_frm_1_asn(const E2SM_KPM_IndicationHeader_Format1_t * ind_hdr_asn)
 {
     kpm_ric_ind_hdr_format_1_t ind_hdr = {0};
 
-    uint64_t reversed_ts;
-    reversed_ts = octet_string_to_int_64(ind_hdr_asn->colletStartTime);
-    ind_hdr.collectStartTime = ntohll(reversed_ts);
+    assert(ind_hdr_asn != NULL);
+    assert(ind_hdr_asn->colletStartTime.size == 8);
+    assert(ind_hdr_asn->colletStartTime.buf != NULL);
+    const time_t reference = time(NULL);
+    assert(reference != (time_t)-1 && "Unable to read timestamp era reference");
+    const uint64_t ntp_timestamp = kpm_timestamp_read_be(ind_hdr_asn->colletStartTime.buf);
+    ind_hdr.collectStartTime = kpm_timestamp_to_unix_us(ntp_timestamp, (int64_t)reference);
     
     if (ind_hdr_asn->fileFormatversion != NULL){
       ind_hdr.fileformat_version = calloc(1, sizeof(byte_array_t));

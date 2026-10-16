@@ -1,29 +1,11 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <arpa/inet.h> // htonl
 
 #include "../../../../../util/conversions.h"
 
 #include "enc_ric_ind_hdr_frm_1.h"
-
-// #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
-
-// uint64_t htonll(uint64_t x)
-// {
-//   return (uint64_t)((uint64_t)htonl((x) & 0xFFFFFFFFLL) << 32) | (uint32_t)htonl(x);
-// }
-
-uint64_t htonll(uint64_t x)
-{
-    uint32_t x1 = (uint32_t)((x & 0xFFFFFFFF00000000LL) >> 32);
-    uint32_t x2 = (uint32_t)(x & 0xFFFFFFFFLL);
-    x1 = htonl(x1);
-    x2 = htonl(x2);
-    uint64_t v = ((uint64_t)x1) << 32 | x2;
-
-    return v;
-}
+#include "../../ie/kpm_data_ie/kpm_ric_info/kpm_timestamp.h"
 
 E2SM_KPM_IndicationHeader_Format1_t * kpm_enc_ind_hdr_frm_1_asn(const kpm_ric_ind_hdr_format_1_t * ind_hdr)
 {
@@ -31,11 +13,12 @@ E2SM_KPM_IndicationHeader_Format1_t * kpm_enc_ind_hdr_frm_1_asn(const kpm_ric_in
     assert(ind_hdr_asn != NULL && "Memory exhausted");
 
 
-    uint64_t ts = htonll(ind_hdr->collectStartTime);
-    ind_hdr_asn->colletStartTime = int_64_to_octet_string(ts);
+    uint8_t timestamp_bytes[8];
+    kpm_timestamp_write_be(timestamp_bytes, kpm_timestamp_from_unix_us(ind_hdr->collectStartTime));
+    int ret = OCTET_STRING_fromBuf(&ind_hdr_asn->colletStartTime,
+                                  (const char *)timestamp_bytes, sizeof(timestamp_bytes));
+    assert(ret == 0);
 
-
-    int ret;
 
     if (ind_hdr->fileformat_version != NULL){
         ind_hdr_asn->fileFormatversion = calloc(1, sizeof(*ind_hdr_asn->fileFormatversion));

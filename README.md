@@ -1,5 +1,15 @@
 # FlexRIC
 
+## Upstream origin
+
+This repository is an independently maintained fork of
+[EURECOM Mosaic5G FlexRIC](https://gitlab.eurecom.fr/mosaic5g/flexric),
+used for RIC and xApp development in the [Falcon project](https://github.com/Ruibin2000/Falcon).
+It was created by cloning the original GitLab repository and publishing it as a standalone GitHub repository.
+
+The Falcon development baseline is the upstream `br-flexric` branch at commit
+[`73650812`](https://gitlab.eurecom.fr/mosaic5g/flexric/-/commit/736508123fe4b5dc3db83fb5baf5f0a8e9b04fe8).
+
 This repository contains [O-RAN Alliance](https://www.o-ran.org/) compliant E2 node Agent emulators, a NearRT-RIC, xApps written in C/C++, Python and Go. 
 It implements O-RAN service models (KPM v2, KPM v3, and RC) and various customized service models (NG/GTP, PDCP, RLC, MAC, SLICE, TC) and a built-in emulation.
 Depending on the service model, different encoding schemes have been developed (ASN.1, flatbuffer, plain).

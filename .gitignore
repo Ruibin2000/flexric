@@ -5,3 +5,6 @@ build/
 tags
 archives/
 test_results*.html
+
+/build-ocudu/
+/compile_commands.json

@@ -7,4 +7,5 @@ archives/
 test_results*.html
 
 /build-ocudu/
+/build-kpm-broker/
 /compile_commands.json
